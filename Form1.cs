@@ -19,7 +19,8 @@ namespace Proyecto_Casino
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            Ruleta formulario = new Ruleta();
+            formulario.Show();
         }
     }
 }
