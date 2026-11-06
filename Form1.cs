@@ -22,5 +22,17 @@ namespace Proyecto_Casino
             Ruleta formulario = new Ruleta();
             formulario.Show();
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            ControldeJugadores pantallaJugadores = new ControldeJugadores();
+            pantallaJugadores.Show();
+            this.Hide();
+        }
+
+        private void panel3_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
