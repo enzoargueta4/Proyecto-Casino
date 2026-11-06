@@ -1,4 +1,7 @@
-﻿namespace Proyecto_Casino
+﻿using System;
+using System.Windows.Forms;
+
+namespace Proyecto_Casino
 {
     partial class Ruleta
     {
@@ -40,6 +43,7 @@
             this.button47 = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.cmbJugadores = new System.Windows.Forms.ComboBox();
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.label2 = new System.Windows.Forms.Label();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
@@ -228,6 +232,7 @@
             // 
             // panel4
             // 
+            this.panel4.Controls.Add(this.cmbJugadores);
             this.panel4.Controls.Add(this.pictureBox5);
             this.panel4.Controls.Add(this.label2);
             this.panel4.Controls.Add(this.pictureBox4);
@@ -246,12 +251,24 @@
             this.panel4.Size = new System.Drawing.Size(468, 466);
             this.panel4.TabIndex = 4;
             // 
+            // cmbJugadores
+            // 
+            this.cmbJugadores.BackColor = System.Drawing.Color.White;
+            this.cmbJugadores.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbJugadores.Font = new System.Drawing.Font("Segoe UI", 11F);
+            this.cmbJugadores.ForeColor = System.Drawing.Color.Black;
+            this.cmbJugadores.FormattingEnabled = true;
+            this.cmbJugadores.Location = new System.Drawing.Point(84, 76);
+            this.cmbJugadores.Name = "cmbJugadores";
+            this.cmbJugadores.Size = new System.Drawing.Size(240, 38);
+            this.cmbJugadores.TabIndex = 13;
+            // 
             // pictureBox5
             // 
             this.pictureBox5.BackColor = System.Drawing.Color.White;
             this.pictureBox5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
-            this.pictureBox5.Location = new System.Drawing.Point(107, 370);
+            this.pictureBox5.Location = new System.Drawing.Point(107, 411);
             this.pictureBox5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(48, 51);
@@ -275,7 +292,7 @@
             this.pictureBox4.BackColor = System.Drawing.Color.White;
             this.pictureBox4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
-            this.pictureBox4.Location = new System.Drawing.Point(107, 300);
+            this.pictureBox4.Location = new System.Drawing.Point(109, 339);
             this.pictureBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pictureBox4.Name = "pictureBox4";
             this.pictureBox4.Size = new System.Drawing.Size(48, 51);
@@ -286,7 +303,7 @@
             // button46
             // 
             this.button46.Font = new System.Drawing.Font("Segoe UI Black", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button46.Location = new System.Drawing.Point(107, 370);
+            this.button46.Location = new System.Drawing.Point(107, 411);
             this.button46.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button46.Name = "button46";
             this.button46.Size = new System.Drawing.Size(227, 51);
@@ -299,7 +316,7 @@
             // 
             this.button45.Font = new System.Drawing.Font("Segoe UI Black", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button45.ForeColor = System.Drawing.Color.OliveDrab;
-            this.button45.Location = new System.Drawing.Point(105, 300);
+            this.button45.Location = new System.Drawing.Point(107, 339);
             this.button45.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button45.Name = "button45";
             this.button45.Size = new System.Drawing.Size(227, 51);
@@ -314,7 +331,7 @@
             this.button44.ForeColor = System.Drawing.Color.Coral;
             this.button44.Image = ((System.Drawing.Image)(resources.GetObject("button44.Image")));
             this.button44.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.button44.Location = new System.Drawing.Point(359, 239);
+            this.button44.Location = new System.Drawing.Point(356, 275);
             this.button44.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button44.Name = "button44";
             this.button44.Size = new System.Drawing.Size(65, 54);
@@ -329,7 +346,7 @@
             this.button43.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button43.Image = ((System.Drawing.Image)(resources.GetObject("button43.Image")));
             this.button43.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.button43.Location = new System.Drawing.Point(45, 239);
+            this.button43.Location = new System.Drawing.Point(48, 271);
             this.button43.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button43.Name = "button43";
             this.button43.Size = new System.Drawing.Size(55, 54);
@@ -342,7 +359,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(107, 251);
+            this.textBox1.Location = new System.Drawing.Point(109, 289);
             this.textBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(227, 26);
@@ -351,7 +368,7 @@
             // button42
             // 
             this.button42.Font = new System.Drawing.Font("Stencil", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button42.Location = new System.Drawing.Point(245, 168);
+            this.button42.Location = new System.Drawing.Point(259, 217);
             this.button42.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button42.Name = "button42";
             this.button42.Size = new System.Drawing.Size(107, 50);
@@ -363,7 +380,7 @@
             // button41
             // 
             this.button41.Font = new System.Drawing.Font("Stencil", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button41.Location = new System.Drawing.Point(84, 168);
+            this.button41.Location = new System.Drawing.Point(98, 217);
             this.button41.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button41.Name = "button41";
             this.button41.Size = new System.Drawing.Size(107, 50);
@@ -377,7 +394,7 @@
             this.button40.BackColor = System.Drawing.Color.Black;
             this.button40.Font = new System.Drawing.Font("Showcard Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button40.ForeColor = System.Drawing.Color.AliceBlue;
-            this.button40.Location = new System.Drawing.Point(245, 88);
+            this.button40.Location = new System.Drawing.Point(259, 137);
             this.button40.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button40.Name = "button40";
             this.button40.Size = new System.Drawing.Size(107, 59);
@@ -391,7 +408,7 @@
             this.button39.BackColor = System.Drawing.Color.Red;
             this.button39.Font = new System.Drawing.Font("Showcard Gothic", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button39.ForeColor = System.Drawing.SystemColors.Window;
-            this.button39.Location = new System.Drawing.Point(84, 88);
+            this.button39.Location = new System.Drawing.Point(98, 137);
             this.button39.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button39.Name = "button39";
             this.button39.Size = new System.Drawing.Size(107, 59);
@@ -1052,5 +1069,17 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.Button button47;
+        private System.Windows.Forms.ComboBox cmbJugadores;
+    
+            // --- MÉTODOS REQUERIDOS POR EL DISEÑADOR (NO BORRAR) ---
+        private void label1_Click(object sender, EventArgs e) { }
+        private void panel2_Paint(object sender, PaintEventArgs e) { }
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { }
+        private void button46_Click(object sender, EventArgs e) { }
+        private void pictureBox2_Click(object sender, EventArgs e) { }
+        private void pictureBox2_Click_1(object sender, EventArgs e) { }
+        private void tableLayoutPanel1_Paint_1(object sender, PaintEventArgs e) { }
+
     }
+
 }

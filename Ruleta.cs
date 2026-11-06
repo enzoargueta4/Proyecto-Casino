@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -7,10 +9,17 @@ namespace Proyecto_Casino
 {
     public partial class Ruleta : Form
     {
+        // --- Cadena de Conexión Universal (Compatible en GitHub para ambos) ---
+        private readonly string _connectionString = @"Server=.\SQLEXPRESS;Database=DB_AZAR_USAM;Trusted_Connection=True;Encrypt=False;";
+
         // --- Variables de Estado del Juego ---
         private readonly Random random = new Random();
         private string selectedBetType = ""; // Guarda "RED", "BLACK", "PAR", "IMPAR" o el número ("23", "0", etc.)
         private int currentBetAmount = 0;
+
+        // Variables dinámicas enlazadas a la base de datos
+        private int _idJugadorActivo = 0;
+        private decimal _saldoJugadorActivo = 0m;
 
         // --- Mapeo de la Ruleta (Números y Colores oficiales) ---
         private readonly Dictionary<string, string> numberColors = new Dictionary<string, string>()
@@ -41,6 +50,72 @@ namespace Proyecto_Casino
         private void Ruleta_Load(object sender, EventArgs e)
         {
             textBox1.Text = currentBetAmount.ToString();
+            CargarComboJugadores(); // Llena el ComboBox al iniciar la pantalla
+        }
+
+        // ========================================================
+        // CARGA DIRECTA DESDE SQL SERVER AL COMBOBOX
+        // ========================================================
+        private void CargarComboJugadores()
+        {
+            try
+            {
+                using (var con = new SqlConnection(_connectionString))
+                {
+                    string query = "SELECT Id_Jugador, Nombre + ' (' + Carnet + ')' AS InfoJugador FROM Jugador ORDER BY Nombre ASC";
+                    using (var da = new SqlDataAdapter(query, con))
+                    {
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+
+                        cmbJugadores.DataSource = dt;
+                        cmbJugadores.DisplayMember = "InfoJugador";
+                        cmbJugadores.ValueMember = "Id_Jugador";
+                    }
+                }
+                cmbJugadores.SelectedIndex = -1; // Inicia limpio sin selección obligatoria
+                label4.Text = "Seleccione un Jugador para iniciar sesión";
+            }
+            catch (Exception ex)
+            {
+                label4.Text = "Modo Local (Sin BD SQL Server)";
+                MessageBox.Show($"No se pudieron jalar los jugadores de SQL Server. Verifique su servicio local.\nDetalle: {ex.Message}", "Error Conectividad", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void cmbJugadores_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbJugadores.SelectedValue != null && int.TryParse(cmbJugadores.SelectedValue.ToString(), out int id))
+            {
+                _idJugadorActivo = id;
+                ObtenerSaldoActualBD();
+            }
+        }
+
+        private void ObtenerSaldoActualBD()
+        {
+            try
+            {
+                using (var con = new SqlConnection(_connectionString))
+                {
+                    string query = "SELECT Saldo FROM Jugador WHERE Id_Jugador = @Id";
+                    using (var cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@Id", _idJugadorActivo);
+                        con.Open();
+                        object resultado = cmd.ExecuteScalar();
+                        if (resultado != null)
+                        {
+                            _saldoJugadorActivo = Convert.ToDecimal(resultado);
+                            label4.Text = $"Jugador Activo • Saldo Disponible: ${_saldoJugadorActivo:N2} USD";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al consultar el saldo del alumno: {ex.Message}", "Error SQL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // --- ESCANEO RECURSIVO DEL TABLERO DE NÚMEROS ---
@@ -68,117 +143,129 @@ namespace Proyecto_Casino
             }
         }
 
-        // Evento compartido al hacer clic en cualquier número del tapete (0, 00, 1-36)
         private void BotonNumero_Click(object sender, EventArgs e)
         {
             Button botonPresionado = (Button)sender;
             selectedBetType = botonPresionado.Text;
-            label4.Text = $"Apuesta: Nº {selectedBetType}";
+            label4.Text = $"Apuesta Seleccionada: Nº {selectedBetType}";
         }
 
         // --- EVENTOS VINCULADOS A TUS BOTONES LATERALES ---
-
-        // Botón RED (button39)
         private void button39_Click(object sender, EventArgs e) => selectedBetType = "RED";
-
-        // Botón BLACK (button40)
         private void button40_Click(object sender, EventArgs e) => selectedBetType = "BLACK";
-
-        // Botón PAR (button41)
         private void button41_Click(object sender, EventArgs e) => selectedBetType = "PAR";
-
-        // Botón IMPAR (button42)
         private void button42_Click(object sender, EventArgs e) => selectedBetType = "IMPAR";
 
-        // Botón Apuesta "-" (button43)
         private void button43_Click(object sender, EventArgs e)
         {
-            if (currentBetAmount - 10 >= 0)
-            {
-                currentBetAmount -= 10;
-                textBox1.Text = currentBetAmount.ToString();
-            }
+            if (currentBetAmount - 10 >= 0) { currentBetAmount -= 10; textBox1.Text = currentBetAmount.ToString(); }
         }
 
-        // Botón Apuesta "+" (button44)
         private void button44_Click(object sender, EventArgs e)
         {
-            currentBetAmount += 10;
-            textBox1.Text = currentBetAmount.ToString();
+            currentBetAmount += 10; textBox1.Text = currentBetAmount.ToString();
         }
 
-        // Botón "Girar Ruleta" (button45)
         private void button45_Click(object sender, EventArgs e)
         {
-            // Sincronizar por si el usuario escribió el número manualmente
-            if (int.TryParse(textBox1.Text, out int montoManual))
+            // 1. Sincroniza el jugador seleccionado antes de validar
+            if (cmbJugadores.SelectedValue != null && int.TryParse(cmbJugadores.SelectedValue.ToString(), out int id))
             {
-                currentBetAmount = montoManual;
+                _idJugadorActivo = id;
             }
 
-            if (string.IsNullOrEmpty(selectedBetType))
+            if (_idJugadorActivo == 0)
             {
-                MessageBox.Show("Por favor, seleccione un número o condición (RED, BLACK, PAR, IMPAR) para apostar.", "Alerta");
+                MessageBox.Show("Por favor, seleccione un jugador del menú desplegable antes de girar.", "Falta Jugador");
                 return;
             }
 
-            if (currentBetAmount <= 0)
+            // 2. FORZAR LA CONSULTA DEL SALDO REAL EN LA BASE DE DATOS AQUÍ
+            ObtenerSaldoActualBD();
+
+            if (string.IsNullOrEmpty(selectedBetType) || !int.TryParse(textBox1.Text, out currentBetAmount) || currentBetAmount <= 0)
             {
-                MessageBox.Show("Por favor, aumente el monto de su apuesta.", "Alerta");
+                MessageBox.Show("Configure su apuesta correctamente seleccionando una casilla y un monto válido.", "Alerta");
+                return;
+            }
+
+            if ((decimal)currentBetAmount > _saldoJugadorActivo)
+            {
+                MessageBox.Show("El jugador seleccionado no posee saldo suficiente para cubrir esta apuesta.", "Fondos Insuficientes");
+                return;
+            }
+
+
+
+            if (string.IsNullOrEmpty(selectedBetType) || !int.TryParse(textBox1.Text, out currentBetAmount) || currentBetAmount <= 0)
+            {
+                MessageBox.Show("Configure su apuesta correctamente seleccionando una casilla y un monto válido.", "Alerta");
+                return;
+            }
+
+            if ((decimal)currentBetAmount > _saldoJugadorActivo)
+            {
+                MessageBox.Show("El jugador seleccionado no posee saldo suficiente para cubrir esta apuesta.", "Fondos Insuficientes");
                 return;
             }
 
             int randomIndex = random.Next(rouletteNumbers.Count);
             string winningNumber = rouletteNumbers[randomIndex];
             string colorResult = numberColors[winningNumber];
-            string parityResult = "Invalido";
+            string parityResult = (winningNumber != "0" && winningNumber != "00" && int.Parse(winningNumber) % 2 == 0) ? "PAR" : "IMPAR";
 
-            if (winningNumber != "0" && winningNumber != "00")
+            bool playerWon = (selectedBetType == "RED" && colorResult == "RED") ||
+                             (selectedBetType == "BLACK" && colorResult == "BLACK") ||
+                             (selectedBetType == "PAR" && parityResult == "PAR") ||
+                             (selectedBetType == "IMPAR" && parityResult == "IMPAR") ||
+                             (selectedBetType == winningNumber);
+
+            decimal gananciaCalculada = 0;
+            if (playerWon)
             {
-                int numericValue = int.Parse(winningNumber);
-                parityResult = (numericValue % 2 == 0) ? "PAR" : "IMPAR";
+                gananciaCalculada = (selectedBetType == winningNumber) ? currentBetAmount * 35 : currentBetAmount;
+            }
+            else
+            {
+                gananciaCalculada = -currentBetAmount;
             }
 
-            label4.Text = $"{winningNumber} * {colorResult} * {(parityResult != "Invalido" ? parityResult : "Green Side")}";
+            decimal saldoFinal = _saldoJugadorActivo + gananciaCalculada;
+            string dbTipoApuesta = (selectedBetType == "RED" || selectedBetType == "BLACK") ? selectedBetType : "NUMERO";
+            int intResultadoConvertido = (winningNumber == "00") ? -1 : int.Parse(winningNumber);
 
-            bool playerWon = false;
-            if (selectedBetType == "RED" && colorResult == "RED") playerWon = true;
-            else if (selectedBetType == "BLACK" && colorResult == "BLACK") playerWon = true;
-            else if (selectedBetType == "PAR" && parityResult == "PAR") playerWon = true;
-            else if (selectedBetType == "IMPAR" && parityResult == "IMPAR") playerWon = true;
-            else if (selectedBetType == winningNumber) playerWon = true;
+             ProcesarResultadoEnBD(dbTipoApuesta, selectedBetType, intResultadoConvertido, (decimal)currentBetAmount, playerWon ? gananciaCalculada : 0, saldoFinal);
+
+
+
+
+            label4.Text = $"Salió: {winningNumber} ({colorResult})";
 
             if (playerWon)
             {
-                button47.Text = "¡GANASTE! +";
+                button47.Text = $"¡GANASTE! +${gananciaCalculada:F2}";
                 button47.BackColor = Color.Lime;
             }
             else
             {
-                button47.Text = "PERDISTE";
+                button47.Text = $"PERDISTE -${currentBetAmount}";
                 button47.BackColor = Color.DarkRed;
             }
         }
 
-        // Botón "Limpiar" (button46)
-        private void button46_Click(object sender, EventArgs e)
+        private void ProcesarResultadoEnBD(string tipoApuesta, string apuestaSeleccionada, int resultado, decimal montoApuesta, decimal ganancia, decimal saldoFinal)
         {
-            selectedBetType = "";
-            currentBetAmount = 0;
-            textBox1.Text = "0";
+            using (var con = new SqlConnection(_connectionString))
+            using (var cmd = new SqlCommand(
+                "UPDATE Jugador SET Saldo = @Saldo WHERE Id_Jugador = @IdJugador", con))
+            {
+                cmd.Parameters.AddWithValue("@Saldo", saldoFinal);
+                cmd.Parameters.AddWithValue("@IdJugador", _idJugadorActivo);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
 
-            label4.Text = "- * - * -";
-            button47.Text = "";
-            button47.BackColor = Color.Transparent;
+            _saldoJugadorActivo = saldoFinal;
         }
-
-        // --- MÉTODOS REQUERIDOS POR EL DISEÑADOR (NO BORRAR) ---
-        // Estos métodos vacíos solucionan los errores del Diseñador.cs
-        private void label1_Click(object sender, EventArgs e) { }
-        private void panel2_Paint(object sender, PaintEventArgs e) { }
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { }
-        private void pictureBox2_Click(object sender, EventArgs e) { }
-        private void pictureBox2_Click_1(object sender, EventArgs e) { }
-        private void tableLayoutPanel1_Paint_1(object sender, PaintEventArgs e) { }
     }
 }
