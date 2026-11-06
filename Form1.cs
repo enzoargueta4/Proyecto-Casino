@@ -34,5 +34,17 @@ namespace Proyecto_Casino
         {
 
         }
+
+        private void btnHistorial_Click(object sender, EventArgs e)
+        {
+            // Crear una instancia del formulario historial
+            historial ventanaHistorial = new historial();
+
+            // Mostrar el formulario de manera independiente
+            ventanaHistorial.Show();
+
+            // Opcional: Si quieres cerrar o abrirlo como diálogo modal, usa ventanaHistorial.ShowDialog();
+        }
     }
+
 }
