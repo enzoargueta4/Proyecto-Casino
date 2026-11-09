@@ -45,6 +45,13 @@ namespace Proyecto_Casino
 
             // Opcional: Si quieres cerrar o abrirlo como diálogo modal, usa ventanaHistorial.ShowDialog();
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form2 autores= new Form2();
+            autores.Show();
+
+        }
     }
 
 }
