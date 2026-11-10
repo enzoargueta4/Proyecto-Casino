@@ -31,6 +31,7 @@ namespace Proyecto_Casino
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Ruleta));
             this.panel1 = new System.Windows.Forms.Panel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -95,6 +96,7 @@ namespace Proyecto_Casino
             this.button1 = new System.Windows.Forms.Button();
             this.button18 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel2.SuspendLayout();
@@ -973,6 +975,11 @@ namespace Proyecto_Casino
             this.button15.Text = "BLACK    15";
             this.button15.UseVisualStyleBackColor = false;
             // 
+            // timer1
+            // 
+            this.timer1.Interval = 3000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // Ruleta
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -1075,11 +1082,12 @@ namespace Proyecto_Casino
         private void label1_Click(object sender, EventArgs e) { }
         private void panel2_Paint(object sender, PaintEventArgs e) { }
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e) { }
-        private void button46_Click(object sender, EventArgs e) { }
+        private void Button46_Click(object sender, EventArgs e) { }
         private void pictureBox2_Click(object sender, EventArgs e) { }
         private void pictureBox2_Click_1(object sender, EventArgs e) { }
         private void tableLayoutPanel1_Paint_1(object sender, PaintEventArgs e) { }
 
+        private Timer timer1;
     }
 
 }

@@ -118,7 +118,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="sonido_fail" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Efecto sonido de fallo ( Sonido fail ).wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="premio_victoria" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Fnaf Kids Saying Yay Sound Effect #sfx.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Screenshot 2026-11-06 090718" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Screenshot 2026-11-06 090718.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="musica_casino" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shop Theme (Zelda Bitcrushed Old Speaker Lofi Mix).wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ruleta_girando" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shop Theme (Zelda Bitcrushed Old Speaker Lofi Mix).wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>
