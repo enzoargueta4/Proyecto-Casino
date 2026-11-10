@@ -10,8 +10,8 @@ namespace Proyecto_Casino
 {
     public partial class Ruleta : Form
     {
-        // --- Cadena de Conexión Universal (Compatible en GitHub para ambos) ---
-        private readonly string _connectionString = @"Server=.\SQLEXPRESS;Database=DB_AZAR_USAM;Trusted_Connection=True;Encrypt=False;";
+        // --- Cadena de Conexión Real para tu Servidor ---
+        private readonly string _connectionString = @"Data Source=DESKTOP-GDAOJOT\SQLEXPRESS;Initial Catalog=DB_AZAR_USAM;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;";
 
         // --- Variables de Estado del Juego ---
         private readonly Random random = new Random();
@@ -54,7 +54,6 @@ namespace Proyecto_Casino
             AsignarEventosTablero();
             InicializarControlDeSonidos(); // Cargar instancias de reproductores
         }
-
         private void Ruleta_Load(object sender, EventArgs e)
         {
             textBox1.Text = currentBetAmount.ToString();
@@ -62,14 +61,10 @@ namespace Proyecto_Casino
             ReproducirMusicaAmbiente(); // Activa música de fondo del casino
         }
 
-        // ========================================================
-        // ASIGNACIÓN DE RECURSOS DE AUDIO (.WAV)
-        // ========================================================
         private void InicializarControlDeSonidos()
         {
             try
             {
-                // Vinculación directa con el archivo de recursos de tu proyecto
                 musicaAmbiente = new SoundPlayer(Properties.Resources.musica_casino);
                 sonidoGiro = new SoundPlayer(Properties.Resources.ruleta_girando);
                 sonidoGanar = new SoundPlayer(Properties.Resources.premio_victoria);
@@ -85,13 +80,10 @@ namespace Proyecto_Casino
         {
             if (musicaAmbiente != null)
             {
-                musicaAmbiente.PlayLooping(); // Reproducción continua indefinida
+                musicaAmbiente.PlayLooping();
             }
         }
 
-        // ========================================================
-        // CARGA DIRECTA DESDE SQL SERVER AL COMBOBOX
-        // ========================================================
         private void CargarComboJugadores()
         {
             try
@@ -109,13 +101,13 @@ namespace Proyecto_Casino
                         cmbJugadores.ValueMember = "Id_Jugador";
                     }
                 }
-                cmbJugadores.SelectedIndex = -1; // Inicia limpio sin selección obligatoria
+                cmbJugadores.SelectedIndex = -1;
                 label4.Text = "Seleccione un Jugador para iniciar sesión";
             }
             catch (Exception ex)
             {
                 label4.Text = "Modo Local (Sin BD SQL Server)";
-                MessageBox.Show($"No se pudieron jalar los jugadores de SQL Server. Verifique su servicio local.\nDetalle: {ex.Message}", "Error Conectividad", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"No se pudieron jalar los jugadores de SQL Server: {ex.Message}", "Error Conectividad", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -150,11 +142,9 @@ namespace Proyecto_Casino
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al consultar el saldo del alumno: {ex.Message}", "Error SQL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al consultar el saldo: {ex.Message}", "Error SQL", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        // --- ESCANEO RECURSIVO DEL TABLERO DE NÚMEROS ---
         private void AsignarEventosTablero()
         {
             AsignarEventosRecursivos(this);
@@ -186,7 +176,6 @@ namespace Proyecto_Casino
             label4.Text = $"Apuesta Seleccionada: Nº {selectedBetType}";
         }
 
-        // --- EVENTOS VINCULADOS A TUS BOTONES LATERALES ---
         private void button39_Click(object sender, EventArgs e) => selectedBetType = "RED";
         private void button40_Click(object sender, EventArgs e) => selectedBetType = "BLACK";
         private void button41_Click(object sender, EventArgs e) => selectedBetType = "PAR";
@@ -201,13 +190,8 @@ namespace Proyecto_Casino
         {
             currentBetAmount += 10; textBox1.Text = currentBetAmount.ToString();
         }
-
-        // ========================================================
-        // PROCESO DE GIRO Y VALIDACIÓN DE RESULTADOS CON AUDIOS
-        // ========================================================
         private void button45_Click(object sender, EventArgs e)
         {
-            // 1. Sincroniza el jugador seleccionado antes de validar
             if (cmbJugadores.SelectedValue != null && int.TryParse(cmbJugadores.SelectedValue.ToString(), out int id))
             {
                 _idJugadorActivo = id;
@@ -219,7 +203,6 @@ namespace Proyecto_Casino
                 return;
             }
 
-            // 2. FORZAR LA CONSULTA DEL SALDO REAL EN LA BASE DE DATOS AQUÍ
             ObtenerSaldoActualBD();
 
             if (string.IsNullOrEmpty(selectedBetType) || !int.TryParse(textBox1.Text, out currentBetAmount) || currentBetAmount <= 0)
@@ -234,49 +217,61 @@ namespace Proyecto_Casino
                 return;
             }
 
-            // Deshabilitamos el botón temporalmente para evitar múltiples clics falsos
             button45.Enabled = false;
             label4.Text = "La ruleta está girando... ¡Mucha suerte!";
 
-            // --- LIBERAR EL CANAL DE AUDIO PARA LOS EFECTOS ---
-            if (musicaAmbiente != null)
-            {
-                musicaAmbiente.Stop(); // Silencia la música de fondo para que entren los efectos
-            }
+            if (musicaAmbiente != null) musicaAmbiente.Stop();
+            if (sonidoGiro != null) sonidoGiro.Play();
 
-            if (sonidoGiro != null)
-            {
-                sonidoGiro.Play(); // Inicia el sonido de la bola corriendo en la rueda
-            }
-
-            // Iniciamos los 3 segundos de suspenso
             timer1.Start();
         }
 
-        // ========================================================
-        // PROCESAR RESULTADO EN BASE DE DATOS
-        // ========================================================
         private void ProcesarResultadoEnBD(string tipoApuesta, string apuestaSeleccionada, int resultado, decimal montoApuesta, decimal ganancia, decimal saldoFinal)
         {
-            using (var con = new SqlConnection(_connectionString))
-            using (var cmd = new SqlCommand("UPDATE Jugador SET Saldo = @Saldo WHERE Id_Jugador = @IdJugador", con))
+            try
             {
-                cmd.Parameters.AddWithValue("@Saldo", saldoFinal);
-                cmd.Parameters.AddWithValue("@IdJugador", _idJugadorActivo);
-                con.Open();
-                cmd.ExecuteNonQuery();
-            }
+                using (var con = new SqlConnection(_connectionString))
+                {
+                    con.Open();
 
-            _saldoJugadorActivo = saldoFinal;
+                    // 1. Actualizar el saldo del alumno en la tabla Jugador
+                    string queryUpdate = "UPDATE Jugador SET Saldo = @Saldo WHERE Id_Jugador = @IdJugador";
+                    using (var cmdUpdate = new SqlCommand(queryUpdate, con))
+                    {
+                        cmdUpdate.Parameters.AddWithValue("@Saldo", saldoFinal);
+                        cmdUpdate.Parameters.AddWithValue("@IdJugador", _idJugadorActivo);
+                        cmdUpdate.ExecuteNonQuery();
+                    }
+
+                    // 2. Insertar la jugada real en la tabla Partida para el Historial
+                    string queryInsert = @"
+                        INSERT INTO Partida (Id_Jugador, Fecha, TipoApuesta, Eleccion, Resultado, MontoApostado, Ganancia, SaldoFinal) 
+                        VALUES (@IdJugador, GETDATE(), @TipoApuesta, @Eleccion, @Resultado, @MontoApostado, @Ganancia, @SaldoFinal)";
+
+                    using (var cmdInsert = new SqlCommand(queryInsert, con))
+                    {
+                        cmdInsert.Parameters.AddWithValue("@IdJugador", _idJugadorActivo);
+                        cmdInsert.Parameters.AddWithValue("@TipoApuesta", tipoApuesta);
+                        cmdInsert.Parameters.AddWithValue("@Eleccion", apuestaSeleccionada);
+                        cmdInsert.Parameters.AddWithValue("@Resultado", resultado);
+                        cmdInsert.Parameters.AddWithValue("@MontoApostado", montoApuesta);
+                        cmdInsert.Parameters.AddWithValue("@Ganancia", ganancia);
+                        cmdInsert.Parameters.AddWithValue("@SaldoFinal", saldoFinal);
+                        cmdInsert.ExecuteNonQuery();
+                    }
+                }
+                _saldoJugadorActivo = saldoFinal;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al registrar la jugada en SQL Server: {ex.Message}", "Error de Base de Datos");
+            }
         }
 
-        // ========================================================
-        // EVENTO DEL TIMER (SE DETIENE LA RUEDA Y SE REPRODUCE EL RESULTADO)
-        // ========================================================
         private void timer1_Tick(object sender, EventArgs e)
         {
-            timer1.Stop(); // Apagamos el reloj para que ocurra una sola vez
-            button45.Enabled = true; // Habilitamos el botón para la próxima ronda
+            timer1.Stop();
+            button45.Enabled = true;
 
             int randomIndex = random.Next(rouletteNumbers.Count);
             string winningNumber = rouletteNumbers[randomIndex];
@@ -303,34 +298,23 @@ namespace Proyecto_Casino
             string dbTipoApuesta = (selectedBetType == "RED" || selectedBetType == "BLACK") ? selectedBetType : "NUMERO";
             int intResultadoConvertido = (winningNumber == "00") ? -1 : int.Parse(winningNumber);
 
-            // Modificación en la Base de Datos única
             ProcesarResultadoEnBD(dbTipoApuesta, selectedBetType, intResultadoConvertido, (decimal)currentBetAmount, playerWon ? gananciaCalculada : 0, saldoFinal);
             label4.Text = $"Salió: {winningNumber} ({colorResult})";
 
-            // --- RESOLUCIÓN FINAL DE AUDIOS (EL CANAL DE AUDIO ESTÁ LIBRE) ---
             if (playerWon)
             {
                 button47.Text = $"¡GANASTE! +${gananciaCalculada:F2}";
                 button47.BackColor = Color.Lime;
-
-                if (sonidoGanar != null)
-                {
-                    sonidoGanar.Play(); // Reproduce aplausos sin interrupción
-                }
+                if (sonidoGanar != null) sonidoGanar.Play();
             }
             else
             {
                 button47.Text = $"PERDISTE -${currentBetAmount}";
                 button47.BackColor = Color.DarkRed;
-
-                if (sonidoPerder != null)
-                {
-                    sonidoPerder.Play(); // Reproduce el sonido de fallo (fail)
-                }
+                if (sonidoPerder != null) sonidoPerder.Play();
             }
         }
 
-        // --- BOTÓN LIMPIAR / REINICIAR CON REESTABLECIMIENTO DE AUDIO ---
         private void button46_Click(object sender, EventArgs e)
         {
             selectedBetType = "";
@@ -339,8 +323,7 @@ namespace Proyecto_Casino
             button47.Text = "Resultados";
             button47.BackColor = SystemColors.Control;
             label4.Text = "Seleccione una casilla para apostar";
-
-            ReproducirMusicaAmbiente(); // Vuelve a poner la música de casino continua para la próxima jugada
+            ReproducirMusicaAmbiente();
         }
-    } // Cierre de la clase Ruleta
-} // Cierre del namespace Proyecto_Casino
+    }
+}
